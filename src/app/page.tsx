@@ -1,12 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Database, AlertCircle, CheckCircle2, Search, FileText, Send, Crown } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { Send, FileText, CheckCircle2, AlertCircle, Clock, BookOpen, ChevronRight } from 'lucide-react'
+
+// types
+type Report = {
+  id: string
+  title: string
+  category: string
+  summary: string
+  created_at: string
+}
 
 export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [reports, setReports] = useState<Report[]>([])
+  const [isLoadingReports, setIsLoadingReports] = useState(true)
+
+  const fetchReports = async () => {
+    setIsLoadingReports(true)
+    const { data, error } = await supabase
+      .from('research_reports')
+      .select('id, title, category, summary, created_at')
+      .order('created_at', { ascending: false })
+    
+    if (data) setReports(data)
+    setIsLoadingReports(false)
+  }
+
+  useEffect(() => {
+    fetchReports()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -22,8 +49,8 @@ export default function Home() {
 
     try {
       // TODO: n8n webhook 호출
-      console.log('n8n 트리거로 전송될 페이로드:', payload)
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      console.log('Webhook Payload:', payload)
+      await new Promise(resolve => setTimeout(resolve, 1000))
       setStatus('success')
       e.currentTarget.reset()
     } catch (err) {
@@ -35,114 +62,151 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-[#050505] text-slate-200">
-      <main className="max-w-4xl mx-auto px-6 py-12 md:py-20">
-        <div className="mb-12 text-center">
-          <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(245,158,11,0.15)]">
-            <Crown className="w-8 h-8 text-amber-500" />
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 h-screen flex flex-col">
+        
+        {/* 상단 1/4: 심플한 입력창 */}
+        <div className="bg-white border border-slate-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] rounded-2xl p-6 mb-8 shrink-0">
+          <div className="flex justify-between items-center mb-5">
+            <h1 className="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+              <span className="w-2 h-6 bg-blue-600 rounded-sm inline-block"></span>
+              AI Research Trigger
+            </h1>
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">AI 리서치 <span className="text-amber-500">통제 센터</span></h1>
-          <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            대표님 전용 프라이빗 리서치 공간입니다. 분석을 원하는 사건의 개요, 기사, 혹은 판례 전문을 붙여넣고 즉시 실행하세요.
-          </p>
           
-          <div className="mt-8 flex justify-center gap-4">
-            <Link href="/insights" className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 border border-slate-700 hover:border-amber-500 hover:text-amber-400 text-slate-300 transition-all rounded-full text-sm font-medium shadow-lg">
-              <Database className="w-4 h-4" />
-              과거 분석된 리서치(인사이트) 보드 바로가기
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-10 backdrop-blur-sm relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          
-          <form className="relative" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-slate-500" />
-                  리서치 제목 (가제)
-                </label>
+          <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-5">
+            <div className="flex-1 space-y-4">
+              <div className="flex flex-col xl:flex-row xl:items-center gap-4">
                 <input 
                   type="text" 
                   name="title"
                   required
-                  placeholder="예: 최신 전세사기 대법원 판례 분석" 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                  placeholder="분석 제목 (예: 판례 2023다1234 분석)" 
+                  className="xl:w-1/3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
+                
+                {/* 라디오 버튼 그룹: 분석 모드 */}
+                <div className="flex items-center gap-5 text-sm font-semibold text-slate-600 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 text-xs hidden sm:inline-block">분석 모드:</span>
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">
+                    <input type="radio" name="category" value="일반모드" defaultChecked className="accent-blue-600 w-4 h-4 cursor-pointer" />
+                    🌐 일반모드
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">
+                    <input type="radio" name="category" value="법률일반혼합" className="accent-blue-600 w-4 h-4 cursor-pointer" />
+                    ⚖️+🌐 법률일반혼합
+                  </label>
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">
+                    <input type="radio" name="category" value="법률전용" className="accent-blue-600 w-4 h-4 cursor-pointer" />
+                    ⚖️ 법률전용
+                  </label>
+                </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                  <Search className="w-4 h-4 text-slate-500" />
-                  분석 모드 (카테고리)
-                </label>
-                <select 
-                  name="category"
-                  required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="법률">⚖️ 법률 모드 (전문/판례 중심 서치)</option>
-                  <option value="일반">🌐 일반 모드 (뉴스/블로그 폭넓은 서치)</option>
-                </select>
-              </div>
-            </div>
 
-            <div className="space-y-3 mb-10">
-              <label className="text-sm font-medium text-slate-300 flex justify-between items-center">
-                <span>분석할 내용 (텍스트/사건 개요/기사 스크랩)</span>
-                <span className="text-xs text-slate-500">최대 20,000자 지원</span>
-              </label>
               <textarea 
                 name="researchText"
                 required
-                rows={12}
-                placeholder="여기에 통째로 복사해서 붙여넣으세요. LLM이 맥락을 파악하고 스스로 깊이 파고들 검색 키워드를 도출해 냅니다."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all resize-y font-mono text-sm leading-relaxed"
+                rows={3}
+                placeholder="여기에 판례나 기사 등 원문 데이터를 자유롭게 붙여넣으세요. LLM이 맥락을 스스로 파악합니다."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-y"
               ></textarea>
             </div>
 
-            {status === 'success' && (
-              <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-emerald-400">데이터 전송 완료!</h4>
-                  <p className="text-sm text-slate-400 mt-1">
-                    n8n 워크플로우가 분석을 시작하며, 완료 시 자동으로 인사이트 보드에 업로드됩니다.
-                  </p>
+            <div className="md:w-36 flex flex-col gap-3 shrink-0">
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold tracking-wide rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm shadow-blue-600/20"
+              >
+                {isSubmitting ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    실행 (RUN)
+                  </>
+                )}
+              </button>
+              
+              {status === 'success' && (
+                <div className="text-[11px] font-bold text-center flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> 전송 성공
                 </div>
-              </div>
-            )}
-
-            {status === 'error' && (
-              <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-red-400">전송 실패</h4>
-                  <p className="text-sm text-slate-400 mt-1">네트워크 오류가 발생했습니다. 다시 시도해 주세요.</p>
-                </div>
-              </div>
-            )}
-
-            <button 
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                  <span>AI 딥다이브 가동 중...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-                  <span>n8n 워크플로우 실행하기 (Trigger Data)</span>
-                </>
               )}
-            </button>
+              {status === 'error' && (
+                <div className="text-[11px] font-bold text-center flex items-center justify-center gap-1 py-1.5 px-2 bg-red-50 text-red-600 rounded-lg border border-red-100">
+                  <AlertCircle className="w-3.5 h-3.5" /> 통신 오류
+                </div>
+              )}
+            </div>
           </form>
         </div>
+
+        {/* 하단 3/4: 출력 결과물 (인사이트 보드) */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] p-6">
+          <div className="flex items-center justify-between mb-6 shrink-0 border-b border-slate-100 pb-4">
+            <h2 className="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-slate-400" />
+              분석 결과 리포트
+            </h2>
+            <button onClick={fetchReports} className="text-[13px] font-bold text-slate-400 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1">
+              새로고침
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2 pb-4">
+            {isLoadingReports ? (
+              <div className="h-full flex items-center justify-center text-slate-400 text-sm font-medium">
+                데이터를 불러오는 중입니다...
+              </div>
+            ) : reports.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {reports.map((report) => (
+                  <Link key={report.id} href={`/insights/${report.id}`}>
+                    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-400 hover:shadow-md hover:-translate-y-1 transition-all h-full flex flex-col cursor-pointer group">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold tracking-tight ${
+                          report.category.includes('법률') 
+                            ? 'bg-slate-100 text-slate-700 border border-slate-200' 
+                            : 'bg-blue-50 text-blue-700 border border-blue-100'
+                        }`}>
+                          {report.category}
+                        </span>
+                        <div className="flex items-center text-slate-400/80 text-[11px] font-bold tracking-wider">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {new Date(report.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      
+                      <h3 className="text-[15px] text-slate-800 font-bold leading-snug mb-3 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                        {report.title}
+                      </h3>
+                      
+                      <p className="text-[13px] text-slate-500 leading-relaxed line-clamp-3 mb-4 flex-1">
+                        {report.summary || '상세 보기를 클릭하여 전체 내용을 확인하세요.'}
+                      </p>
+
+                      <div className="mt-auto flex justify-end">
+                        <span className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors text-slate-400">
+                          <ChevronRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="h-full min-h-[300px] flex flex-col items-center justify-center rounded-xl bg-slate-50/50">
+                <div className="w-16 h-16 bg-white border border-slate-100 shadow-sm rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-6 h-6 text-slate-300" />
+                </div>
+                <p className="text-sm font-bold text-slate-500 mb-1">앗, 아직 도착한 분석 보고서가 없습니다.</p>
+                <p className="text-xs font-medium text-slate-400">상단 입력창에서 첫 번째 리서치를 트리거해보세요!</p>
+              </div>
+            )}
+          </div>
+        </div>
+
       </main>
     </div>
   )
