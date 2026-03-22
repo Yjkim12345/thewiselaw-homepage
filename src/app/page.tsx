@@ -1,177 +1,149 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Scale, ShieldCheck, TrendingUp, ArrowRight, CheckCircle } from "lucide-react";
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Database, AlertCircle, CheckCircle2, Search, FileText, Send, Crown } from 'lucide-react'
 
 export default function Home() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setStatus('idle')
+
+    const formData = new FormData(e.currentTarget)
+    const payload = {
+      title: formData.get('title'),
+      category: formData.get('category'),
+      text: formData.get('researchText'),
+    }
+
+    try {
+      // TODO: n8n webhook 호출
+      console.log('n8n 트리거로 전송될 페이로드:', payload)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      setStatus('success')
+      e.currentTarget.reset()
+    } catch (err) {
+      console.error(err)
+      setStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-primary/10 to-background/5" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-sm font-medium text-accent mb-8">
-            <span className="flex h-2 w-2 rounded-full bg-accent mr-2"></span>
-            AI 기반 데이터 분석을 통한 정밀한 법률 서비스
+    <div className="bg-[#050505] text-slate-200">
+      <main className="max-w-4xl mx-auto px-6 py-12 md:py-20">
+        <div className="mb-12 text-center">
+          <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(245,158,11,0.15)]">
+            <Crown className="w-8 h-8 text-amber-500" />
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            당신의 권리를 지키는 <br className="hidden md:block"/>
-            <span className="text-accent">가장 지혜로운 선택</span>
-          </h1>
-          <p className="mt-4 text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-            수만 건의 판례와 최첨단 AI 기술, 그리고 전문 변호사의 통찰력이 만나 
-            가장 확실하고 안전한 법률 솔루션을 제공합니다.
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">AI 리서치 <span className="text-amber-500">통제 센터</span></h1>
+          <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            대표님 전용 프라이빗 리서치 공간입니다. 분석을 원하는 사건의 개요, 기사, 혹은 판례 전문을 붙여넣고 즉시 실행하세요.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="/contact" passHref>
-              <Button size="lg" className="text-base">상담 예약하기</Button>
-            </Link>
-            <Link href="/practice-areas" passHref>
-              <Button variant="outline" size="lg" className="text-base">업무 분야 보기</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Metrics Section */}
-      <section className="py-12 bg-primary/5 border-y border-glass-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-accent mb-2">98%</div>
-              <div className="text-sm text-gray-400">승소율 및 조정 성사율</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-accent mb-2">5,000+</div>
-              <div className="text-sm text-gray-400">누적 상담 건수</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-accent mb-2">15년</div>
-              <div className="text-sm text-gray-400">평균 법조 경력</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-accent mb-2">24/7</div>
-              <div className="text-sm text-gray-400">AI 기반 데이터 분석</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Practice Areas Highlights */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">전문 업무 분야</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              더와이즈는 각 분야의 고도화된 전문성을 바탕으로 빈틈없는 법률 서비스를 실현합니다.
-            </p>
-          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="hover:border-accent/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4 text-accent">
-                  <Scale className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl">민사/손해배상</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 mb-4 line-clamp-3">
-                  계약 분쟁, 불법행위로 인한 손해배상 등 복잡한 민사 사건에서 의뢰인의 정당한 권리와 재산을 되찾아 드립니다.
-                </p>
-                <Link href="/practice-areas#civil" className="text-accent hover:underline inline-flex items-center text-sm font-medium">
-                  자세히 보기 <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:border-accent/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4 text-accent">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl">형사/디지털 범죄</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 mb-4 line-clamp-3">
-                  억울한 혐의 방어부터 디지털 증거 분석을 통한 치밀한 대응까지, 초기 단계부터 확실한 방어막을 구축합니다.
-                </p>
-                <Link href="/practice-areas#criminal" className="text-accent hover:underline inline-flex items-center text-sm font-medium">
-                  자세히 보기 <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:border-accent/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center mb-4 text-accent">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-                <CardTitle className="text-xl">부동산/건설</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 mb-4 line-clamp-3">
-                  재개발, 재건축, 부동산 PF 등 막대한 자본이 이동하는 영역에서 정확한 리스크 진단과 솔루션을 제시합니다.
-                </p>
-                <Link href="/practice-areas#realestate" className="text-accent hover:underline inline-flex items-center text-sm font-medium">
-                  자세히 보기 <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Link href="/practice-areas" passHref>
-              <Button variant="outline">모든 업무 분야 보기</Button>
+          <div className="mt-8 flex justify-center gap-4">
+            <Link href="/insights" className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 border border-slate-700 hover:border-amber-500 hover:text-amber-400 text-slate-300 transition-all rounded-full text-sm font-medium shadow-lg">
+              <Database className="w-4 h-4" />
+              과거 분석된 리서치(인사이트) 보드 바로가기
             </Link>
           </div>
         </div>
-      </section>
 
-      {/* AI Lex-Pipeline Feature */}
-      <section className="py-24 bg-gradient-to-br from-background via-background to-primary/10 border-t border-glass-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                압도적 승소율의 비밀,<br/>
-                <span className="text-accent">AI 판례 분석 시스템</span>
-              </h2>
-              <p className="text-lg text-gray-400 mb-8">
-                더와이즈는 자체 개발한 'Lex-Pipeline' AI 시스템을 통해 수만 건의 판례와 법령을 실시간으로 분석합니다. 인간의 한계를 넘는 데이터 처리 능력으로 숨겨진 승소 전략을 찾아냅니다.
-              </p>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <CheckCircle className="h-6 w-6 text-accent mr-3 shrink-0" />
-                  <span className="text-gray-300">유사 판례 99% 매칭으로 정확한 승소 가능성 예측</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-6 w-6 text-accent mr-3 shrink-0" />
-                  <span className="text-gray-300">실시간 변화하는 법령 및 판례 자동 추적 시스템</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-6 w-6 text-accent mr-3 shrink-0" />
-                  <span className="text-gray-300">법원별, 판사별 성향에 맞춘 최적화된 변론 전략 수립</span>
-                </li>
-              </ul>
-            </div>
-            <div className="relative">
-              <div className="aspect-square md:aspect-video lg:aspect-square rounded-2xl bg-glass-bg border border-glass-border p-8 shadow-2xl overflow-hidden relative">
-                <div className="relative z-10 font-mono text-sm text-accent/80 space-y-2 h-full flex flex-col justify-end">
-                  <p>&gt; Initializing Lex-Pipeline Worker...</p>
-                  <p>&gt; Scanning latest Supreme Court precedents...</p>
-                  <p>&gt; Found 3,421 matching cases for property law.</p>
-                  <p className="text-green-400">&gt; NLP Analysis Complete. Optimal strategy generated.</p>
-                  <div className="w-full h-1 bg-gray-800 mt-4 overflow-hidden rounded-full">
-                    <div className="w-full h-full bg-accent animate-pulse"></div>
-                  </div>
-                </div>
+        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 md:p-10 backdrop-blur-sm relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          
+          <form className="relative" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  리서치 제목 (가제)
+                </label>
+                <input 
+                  type="text" 
+                  name="title"
+                  required
+                  placeholder="예: 최신 전세사기 대법원 판례 분석" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Search className="w-4 h-4 text-slate-500" />
+                  분석 모드 (카테고리)
+                </label>
+                <select 
+                  name="category"
+                  required
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="법률">⚖️ 법률 모드 (전문/판례 중심 서치)</option>
+                  <option value="일반">🌐 일반 모드 (뉴스/블로그 폭넓은 서치)</option>
+                </select>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
+            <div className="space-y-3 mb-10">
+              <label className="text-sm font-medium text-slate-300 flex justify-between items-center">
+                <span>분석할 내용 (텍스트/사건 개요/기사 스크랩)</span>
+                <span className="text-xs text-slate-500">최대 20,000자 지원</span>
+              </label>
+              <textarea 
+                name="researchText"
+                required
+                rows={12}
+                placeholder="여기에 통째로 복사해서 붙여넣으세요. LLM이 맥락을 파악하고 스스로 깊이 파고들 검색 키워드를 도출해 냅니다."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all resize-y font-mono text-sm leading-relaxed"
+              ></textarea>
+            </div>
+
+            {status === 'success' && (
+              <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-emerald-400">데이터 전송 완료!</h4>
+                  <p className="text-sm text-slate-400 mt-1">
+                    n8n 워크플로우가 분석을 시작하며, 완료 시 자동으로 인사이트 보드에 업로드됩니다.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-red-400">전송 실패</h4>
+                  <p className="text-sm text-slate-400 mt-1">네트워크 오류가 발생했습니다. 다시 시도해 주세요.</p>
+                </div>
+              </div>
+            )}
+
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                  <span>AI 딥다이브 가동 중...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                  <span>n8n 워크플로우 실행하기 (Trigger Data)</span>
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </main>
     </div>
-  );
+  )
 }
