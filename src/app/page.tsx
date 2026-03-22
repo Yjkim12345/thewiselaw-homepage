@@ -23,12 +23,12 @@ export default function Home() {
             가장 확실하고 안전한 법률 솔루션을 제공합니다.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" className="text-base" asChild>
-              <Link href="/contact">상담 예약하기</Link>
-            </Button>
-            <Button variant="outline" size="lg" className="text-base" asChild>
-              <Link href="/practice-areas">업무 분야 보기</Link>
-            </Button>
+            <Link href="/contact" passHref>
+              <Button size="lg" className="text-base">상담 예약하기</Button>
+            </Link>
+            <Link href="/practice-areas" passHref>
+              <Button variant="outline" size="lg" className="text-base">업무 분야 보기</Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -121,9 +121,9 @@ export default function Home() {
           </div>
           
           <div className="mt-12 text-center">
-            <Button variant="outline" asChild>
-              <Link href="/practice-areas">모든 업무 분야 보기</Link>
-            </Button>
+            <Link href="/practice-areas" passHref>
+              <Button variant="outline">모든 업무 분야 보기</Button>
+            </Link>
           </div>
         </div>
       </section>
