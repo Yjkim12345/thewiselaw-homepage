@@ -64,82 +64,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 h-screen flex flex-col">
-        
-        {/* 상단 1/4: 심플한 입력창 */}
+              {/* 상단: 타이틀 또는 배너 (간소화) */}
         <div className="bg-white border border-slate-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] rounded-2xl p-6 mb-8 shrink-0">
-          <div className="flex justify-between items-center mb-5">
+          <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
               <span className="w-2 h-6 bg-blue-600 rounded-sm inline-block"></span>
-              AI Research Trigger
+              더와이즈 로펌 AI 리서치 센터
             </h1>
+            <p className="text-sm text-slate-500 hidden md:block">
+              최첨단 AI가 실시간으로 수집하고 분석한 법률 트인사이트를 제공합니다.
+            </p>
           </div>
-          
-          <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-5">
-            <div className="flex-1 space-y-4">
-              <div className="flex flex-col xl:flex-row xl:items-center gap-4">
-                <input 
-                  type="text" 
-                  name="title"
-                  required
-                  placeholder="분석 제목 (예: 판례 2023다1234 분석)" 
-                  className="xl:w-1/3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-                
-                {/* 라디오 버튼 그룹: 분석 모드 */}
-                <div className="flex items-center gap-5 text-sm font-semibold text-slate-600 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200">
-                  <span className="text-slate-400 text-xs hidden sm:inline-block">분석 모드:</span>
-                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">
-                    <input type="radio" name="category" value="일반모드" defaultChecked className="accent-blue-600 w-4 h-4 cursor-pointer" />
-                    🌐 일반모드
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">
-                    <input type="radio" name="category" value="법률일반혼합" className="accent-blue-600 w-4 h-4 cursor-pointer" />
-                    ⚖️+🌐 법률일반혼합
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-600 transition-colors">
-                    <input type="radio" name="category" value="법률전용" className="accent-blue-600 w-4 h-4 cursor-pointer" />
-                    ⚖️ 법률전용
-                  </label>
-                </div>
-              </div>
-
-              <textarea 
-                name="researchText"
-                required
-                rows={3}
-                placeholder="여기에 판례나 기사 등 원문 데이터를 자유롭게 붙여넣으세요. LLM이 맥락을 스스로 파악합니다."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-y"
-              ></textarea>
-            </div>
-
-            <div className="md:w-36 flex flex-col gap-3 shrink-0">
-              <button 
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold tracking-wide rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm shadow-blue-600/20"
-              >
-                {isSubmitting ? (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    실행 (RUN)
-                  </>
-                )}
-              </button>
-              
-              {status === 'success' && (
-                <div className="text-[11px] font-bold text-center flex items-center justify-center gap-1 py-1.5 px-2 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> 전송 성공
-                </div>
-              )}
-              {status === 'error' && (
-                <div className="text-[11px] font-bold text-center flex items-center justify-center gap-1 py-1.5 px-2 bg-red-50 text-red-600 rounded-lg border border-red-100">
-                  <AlertCircle className="w-3.5 h-3.5" /> 통신 오류
-                </div>
-              )}
-            </div>
-          </form>
         </div>
 
         {/* 하단 3/4: 출력 결과물 (인사이트 보드) */}
