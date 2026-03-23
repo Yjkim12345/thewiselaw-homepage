@@ -78,13 +78,14 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(webhookUrl, {
+      // 🚨 브라우저(Front-end) CORS 우회를 위해 백엔드(Next.js API) 프록시를 통해 n8n으로 전송
+      const response = await fetch('/api/n8n', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ webhookUrl, payload }),
       })
 
-      if (!response.ok) throw new Error('Webhook failed')
+      if (!response.ok) throw new Error('Proxy failed')
 
       setStatus('success')
       e.currentTarget.reset()
