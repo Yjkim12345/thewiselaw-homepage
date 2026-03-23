@@ -82,10 +82,14 @@ export default function AdminDashboard() {
       const response = await fetch('/api/n8n', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin', // Basic Auth 인증 정보 포함
         body: JSON.stringify({ webhookUrl, payload }),
       })
 
-      if (!response.ok) throw new Error('Proxy failed')
+      if (!response.ok) {
+        const errortext = await response.text()
+        throw new Error(`Proxy failed: ${errortext}`)
+      }
 
       setStatus('success')
       e.currentTarget.reset()
