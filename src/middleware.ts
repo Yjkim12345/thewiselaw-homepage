@@ -29,6 +29,6 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     // Next.js 정적 리소스를 제외한 사실상 모든 라우트에 적용 (사이트 전체 폐쇄)
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/n8n).*)',
   ],
 };
